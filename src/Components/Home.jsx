@@ -41,6 +41,7 @@ const Home = () => {
   const transferRef = useRef("");
   const closePinRef = useRef("");
   const closeUserRef = useRef("");
+  const loanRef = useRef();
   const [username, setUsername] = useState("");
   const [current, setCurrent] = useState([]);
   const [currentMovements, setCurrentMovements] = useState([]);
@@ -56,6 +57,7 @@ const Home = () => {
   const [closePin, setClosePin] = useState("");
   const [curAccounts, setCurAccounts] = useState(accounts);
   const [sorted, setSorted] = useState(false);
+  const [loanAmount, setLoanAmount] = useState();
 
   //   console.log(current);
   //   console.log(currentMovements);
@@ -85,6 +87,7 @@ const Home = () => {
     nameRef.current.value = "";
     amountRef.current.value = transferRef.current.value = "";
     closePinRef.current.value = closeUserRef.current.value = "";
+    loanRef.current.value = "";
   };
 
   /////////////////DISPLAY UI/////////////////////////////////
@@ -142,7 +145,7 @@ const Home = () => {
       .map((mov, ind) => mov * (acc.interestRate / 100))
       .filter((int, ind) => int > 0)
       .reduce((cur, acc) => cur + acc, 0);
-    setCurInterest(interest);
+    setCurInterest(Math.trunc(interest));
   };
 
   ///////////////////////Handle Log In ///////////////////////////////
@@ -179,13 +182,27 @@ const Home = () => {
 
   //////////////////Sort Movements///////////////////////////
 
-  const btnSort = (e, mov) => {
-    e.preventDefault();
-    setSorted(!sorted);
+  //   const btnSort = (e, mov) => {
+  //     e.preventDefault();
+  //     setSorted((prev) => !prev);
+  //     const sortMov = sorted ? mov.slice().sort((a, b) => a - b) : mov;
+  //     setCurrentMovements();
+  //     console.log(currentMovements);
+  //     console.log(sorted);
+  //   };
 
-    setCurrentMovements(sorted ? mov.slice().sort((a, b) => a - b) : mov);
-    console.log(currentMovements);
-    console.log(sorted);
+  /////////////////////Request Loan ///////////////////////
+  const handleLoan = (e, mov) => {
+    e.preventDefault();
+    console.log(mov);
+    setLoanAmount(loanRef.current.value);
+    if (mov.some((mov) => mov >= loanAmount * 0.1)) {
+      mov.push(+loanAmount);
+      updateUI(current);
+      clearInput();
+      setCurrentMovements((prev) => prev);
+      console.log(mov);
+    }
   };
 
   /////////////////close Account////////////////////
@@ -204,6 +221,14 @@ const Home = () => {
     }
   };
 
+  //////////////////calculating the highest number in an array using the reduce method///////////////////
+
+  //   const arr = [12, 56, 1, 24, 75, 34, 23, 123, 93, 1];
+  //   const sortedNew = arr.reduce(
+  //     (acc, cur, ind) => (acc > cur && acc[ind] > 1 ? cur : acc),
+  //     0
+  //   );
+  //   console.log(sortedNew);
   return (
     <div className='home'>
       <nav className='navbar'>
@@ -306,10 +331,15 @@ const Home = () => {
                   <h2>Request loan</h2>
                   <form className='form form--loan'>
                     <input
+                      ref={loanRef}
                       type='number'
                       className='form__input form__input--loan-amount'
+                      onChange={(e) => setLoanAmount(e.target.value)}
                     />
-                    <button className='form__btn form__btn--loan'>
+                    <button
+                      onClick={(e) => handleLoan(e, currentMovements)}
+                      className='form__btn form__btn--loan'
+                    >
                       &rarr;
                     </button>
                     <label className='form__label form__label--loan'>
@@ -366,7 +396,7 @@ const Home = () => {
                   {curInterest}€
                 </p>
                 <button
-                  onClick={(e) => btnSort(e, currentMovements)}
+                  //   onClick={(e) => btnSort(e, currentMovements)}
                   className='btn--sort'
                 >
                   &#8595;&#8593;SORT

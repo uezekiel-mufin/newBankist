@@ -4,3 +4,9 @@
   background-color: #f3f3f3;
   width: 100%;
 }
+
+@media (max-width: 600px) {
+  .App {
+    height: 100%;
+  }
+}
