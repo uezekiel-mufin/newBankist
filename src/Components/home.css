@@ -57,6 +57,15 @@
   cursor: pointer;
   transition: all 0.3s;
 }
+.logout__btn {
+  border: none;
+  background: none;
+  font-size: 2rem;
+  color: inherit;
+  cursor: pointer;
+  transition: all 1s;
+  display: none;
+}
 
 .login__btn:hover,
 .login__btn:focus,
@@ -309,7 +318,7 @@ h2 {
 
 @media (max-width: 600px) {
   .welcome {
-    font-size: 1.9rem;
+    font-size: 1.4rem;
     font-weight: 500;
   }
   .main {
@@ -340,11 +349,12 @@ h2 {
   }
   .navbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     padding: 0 4rem;
     height: 60px;
     width: 100%;
+    gap: 1rem;
   }
   .movements {
     display: flex;
@@ -367,10 +377,13 @@ h2 {
   }
   .login {
     display: flex;
+    right: 0px;
+    margin-left: 3rem;
   }
 
   .login__input {
-    width: 8rem;
+    width: 6rem;
+    padding: 0;
   }
   .summary {
     display: flex;
@@ -379,5 +392,13 @@ h2 {
     padding: 0 0.3rem;
     margin-top: 1rem;
     width: 100%;
+  }
+  .logo {
+    height: 3.5rem;
+    margin-right: 1rem;
+    margin-left: 2rem;
+  }
+  p.balance__value {
+    font-size: 3rem;
   }
 }

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./home.css";
-import data from "./data";
+
 import Logo from "../assets/logo.png";
+import { FiLogOut } from "react-icons/fi";
 
 const Home = () => {
   const account1 = {
@@ -24,7 +25,7 @@ const Home = () => {
   };
 
   const account2 = {
-    owner: "Jessica Davis",
+    owner: "Ezekiel Evi",
     movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
     interestRate: 1.5,
     pin: 2222,
@@ -43,7 +44,7 @@ const Home = () => {
   };
 
   const account3 = {
-    owner: "Steven Thomas Williams",
+    owner: "Parry Ogbemudia",
     movements: [200, -200, 340, -300, -20, 50, 400, -460],
     interestRate: 0.7,
     pin: 3333,
@@ -62,7 +63,7 @@ const Home = () => {
   };
 
   const account4 = {
-    owner: "Sarah Smith",
+    owner: "Ose Billions",
     movements: [430, 1000, 700, 50, 90],
     interestRate: 1,
     pin: 4444,
@@ -83,6 +84,8 @@ const Home = () => {
   const accounts = [account1, account2, account3, account4];
   const mainRef = useRef(null);
   const loginRef = useRef("");
+  const loginBtnRef = useRef("");
+  const logoutRef = useRef("");
   const nameRef = useRef("");
   const pinRef = useRef("");
   const amountRef = useRef("");
@@ -116,10 +119,6 @@ const Home = () => {
   const [seconds, setSeconds] = useState("");
   const [timerMinutes, setTimerMinutes] = useState("");
   const [timerSeconds, setTimerSeconds] = useState("");
-  let [time, setTime] = useState(200);
-
-  //   console.log(current);
-  //   console.log(currentMovements);
 
   /////////////////////Setting Dates/////////////////////////////////
   useEffect(() => {
@@ -150,7 +149,6 @@ const Home = () => {
     );
   };
   generateUsername(accounts);
-  //   console.log(accounts);
   const handleUserName = (e) => {
     e.preventDefault();
     setUsername(e.target.value);
@@ -166,19 +164,29 @@ const Home = () => {
   };
 
   //////////////////////Display Timeout///////////////////////////
+  let timer;
   const startTimer = () => {
+    let time = 600;
     timer = setInterval(() => {
       time--;
       const minutes = String(Math.trunc(time / 60)).padStart(2, 0);
       const seconds = String(time % 60).padStart(2, 0);
       setTimerMinutes(minutes);
       setTimerSeconds(seconds);
+
       if (time === 0) {
+        console.log("zero");
         clearInterval(timer);
         mainRef.current.style.opacity = 0;
+        loginBtnRef.current.style.display =
+          nameRef.current.style.display =
+          pinRef.current.style.display =
+            "flex";
+
+        logoutRef.current.style.display = "none";
+        loginRef.current.textContent = "log in to get started";
       }
     }, 1000);
-    return timer;
   };
 
   /////////////////DISPLAY UI/////////////////////////////////
@@ -191,7 +199,7 @@ const Home = () => {
     );
     if (currentAccount) {
       console.log(currentAccount);
-      setTime(20);
+      clearInterval(timer);
       clearInput();
       setCurrent(currentAccount);
       setCurrentMovements(currentAccount.movements);
@@ -201,11 +209,14 @@ const Home = () => {
       calcDeposits(currentAccount);
       calcWithdrawals(currentAccount);
       calcInterest(currentAccount);
+
+      nameRef.current.style.display =
+        pinRef.current.style.display =
+        loginBtnRef.current.style.display =
+          "none";
+      logoutRef.current.style.display = "flex";
       mainRef.current.style.opacity = 1;
-      loginRef.current.textContent = `Welcome Back ${currentAccount.owner}`;
-      setTimeout(() => {
-        loginRef.current.textContent = `${currentAccount.owner}`;
-      }, 4000);
+      loginRef.current.textContent = `Welcome ${currentAccount.owner}`;
 
       //////////////////////generate Date///////////////////
     } else {
@@ -216,7 +227,7 @@ const Home = () => {
   ///////////////////////Calculating Balance/////////////////////////
   const calcBalance = (acc) => {
     const balance = acc.movements.reduce((acc, cur) => acc + cur, 0);
-    setCurBalance(balance);
+    setCurBalance(+balance);
     // console.log(balance);
   };
   ////////////////Calculating deposits////////////////////////////////
@@ -224,7 +235,7 @@ const Home = () => {
     const deposits = acc?.movements
       .filter((mov, ind) => mov > 0)
       .reduce((acc, cur) => acc + cur, 0);
-    setCurDeposit(deposits);
+    setCurDeposit(+deposits);
   };
 
   //////////////////calculating withdrawals///////////////////////////
@@ -232,7 +243,7 @@ const Home = () => {
     const withdrawals = acc?.movements
       .filter((mov, ind) => mov < 0)
       .reduce((acc, cur) => acc + cur, 0);
-    setCurWithdrawals(Math.abs(withdrawals));
+    setCurWithdrawals(+Math.abs(withdrawals));
   };
 
   /////////////calculating interests/////////////////////////////////
@@ -242,17 +253,31 @@ const Home = () => {
       .map((mov, ind) => mov * (acc.interestRate / 100))
       .filter((int, ind) => int > 0)
       .reduce((cur, acc) => cur + acc, 0);
-    setCurInterest(Math.trunc(interest));
+    setCurInterest(+Math.trunc(interest));
   };
 
   ///////////////////////Handle Log In ///////////////////////////////
-  let timer;
+
   const handleLogin = (e) => {
     e.preventDefault();
-    timer && console.log("started timing");
-    startTimer();
     displayUI(curAccounts);
+    startTimer();
     clearInput();
+  };
+
+  //////////////////////////////Handle Log out /////////////////////
+  const handleLogout = (e) => {
+    e.preventDefault();
+    clearInterval(timer);
+    mainRef.current.style.opacity = 0;
+    loginBtnRef.current.style.display =
+      nameRef.current.style.display =
+      pinRef.current.style.display =
+        "flex";
+    setWelcome("");
+    clearInterval(timer);
+    logoutRef.current.style.opacity = 0;
+    loginRef.current.textContent = "Log in to get started";
   };
 
   /////////////UpdateUI////////////////
@@ -297,11 +322,14 @@ const Home = () => {
     console.log(mov);
     setLoanAmount(loanRef.current.value);
     if (mov.some((mov) => mov >= loanAmount * 0.1)) {
-      mov.push(+loanAmount);
-      updateUI(current);
-      clearInput();
-      setCurrentMovements((prev) => prev);
-      console.log(mov);
+      setTimeout(() => {
+        mov.push(+loanAmount);
+        currentMovementsDates.push(new Date().toISOString());
+        updateUI(current);
+        clearInput();
+        setCurrentMovements((prev) => prev);
+        console.log(mov);
+      }, 3000);
     }
   };
 
@@ -327,7 +355,7 @@ const Home = () => {
     <div className='home'>
       <nav className='navbar'>
         <div className='welcome' ref={loginRef}>
-          Log In
+          Log in to get started
         </div>
         <div className='logo'>
           <img src={Logo} alt='logo' />
@@ -352,8 +380,20 @@ const Home = () => {
               className='login__input login__input--pin'
               onChange={(e) => setUserpin(e.target.value)}
             />
-            <button onClick={(e) => handleLogin(e)} className='login__btn'>
+            <button
+              ref={loginBtnRef}
+              onClick={(e) => handleLogin(e)}
+              className='login__btn'
+            >
               &rarr;
+            </button>
+            <button
+              ref={logoutRef}
+              onClick={(e) => handleLogout(e)}
+              className='logout__btn'
+            >
+              logout
+              <FiLogOut />
             </button>
           </form>
         </div>
@@ -368,7 +408,9 @@ const Home = () => {
                 <span className='date'>{`${date}/${month}/${year},  ${hour}:${minutes}`}</span>
               </p>
             </div>
-            <p className='balance__value'>{curBalance}€</p>
+            <p className='balance__value'>
+              {`${(+curBalance).toFixed(2, 0)}`}€
+            </p>
           </div>
           <div className='movement__operations'>
             <div className='mainMiddle'>
@@ -392,7 +434,9 @@ const Home = () => {
                           .split(/[T ]/i, 1)[0]
                       }`}
                     </div>
-                    <div className='movements__value'>{cur}€</div>
+                    <div className='movements__value'>
+                      {`${cur.toFixed(2, 0)}`}€
+                    </div>
                   </div>
                 ))}
               </div>
@@ -486,15 +530,15 @@ const Home = () => {
               <div className='summary'>
                 <p className='summary__label'>In</p>
                 <p className='summary__value summary__value--in'>
-                  {curDeposit}€
+                  {`${(+curDeposit).toFixed(2, 0)}`}€
                 </p>
                 <p className='summary__label'>Out</p>
                 <p className='summary__value summary__value--out'>
-                  {curWithdrawals}
+                  {`${(+curWithdrawals).toFixed(2, 0)}`}
                 </p>
                 <p className='summary__label'>Interest</p>
                 <p className='summary__value summary__value--interest'>
-                  {curInterest}€
+                  {`${(+curInterest).toFixed(2, 0)}`}€
                 </p>
                 <button
                   onClick={(e) => btnSort(e, currentMovements)}
@@ -506,7 +550,6 @@ const Home = () => {
               <p className='logout-timer'>
                 You will be logged out in
                 <span className='timer'>
-                  {" "}
                   {`${timerMinutes}:${timerSeconds}`}
                 </span>
               </p>
