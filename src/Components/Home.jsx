@@ -9,6 +9,18 @@ const Home = () => {
     movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
     interestRate: 1.2, // %
     pin: 1111,
+    movementsDates: [
+      "2019-11-18T21:31:17.178Z",
+      "2019-12-23T07:42:02.383Z",
+      "2020-01-28T09:15:04.904Z",
+      "2020-04-01T10:17:24.185Z",
+      "2020-05-08T14:11:59.604Z",
+      "2020-05-27T17:01:17.194Z",
+      "2020-07-11T23:36:17.929Z",
+      "2020-07-12T10:51:36.790Z",
+    ],
+    currency: "USD",
+    locale: "en-US",
   };
 
   const account2 = {
@@ -16,6 +28,18 @@ const Home = () => {
     movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
     interestRate: 1.5,
     pin: 2222,
+    movementsDates: [
+      "2019-11-18T21:31:17.178Z",
+      "2019-12-23T07:42:02.383Z",
+      "2020-01-28T09:15:04.904Z",
+      "2020-04-01T10:17:24.185Z",
+      "2020-05-08T14:11:59.604Z",
+      "2020-05-27T17:01:17.194Z",
+      "2020-07-11T23:36:17.929Z",
+      "2020-07-12T10:51:36.790Z",
+    ],
+    currency: "EUR",
+    locale: "pt-PT",
   };
 
   const account3 = {
@@ -23,6 +47,18 @@ const Home = () => {
     movements: [200, -200, 340, -300, -20, 50, 400, -460],
     interestRate: 0.7,
     pin: 3333,
+    movementsDates: [
+      "2019-11-01T13:15:33.035Z",
+      "2019-11-30T09:48:16.867Z",
+      "2019-12-25T06:04:23.907Z",
+      "2020-01-25T14:18:46.235Z",
+      "2020-02-05T16:33:06.386Z",
+      "2020-04-10T14:43:26.374Z",
+      "2020-06-25T18:49:59.371Z",
+      "2020-07-26T12:01:20.894Z",
+    ],
+    currency: "USD",
+    locale: "en-US",
   };
 
   const account4 = {
@@ -30,6 +66,18 @@ const Home = () => {
     movements: [430, 1000, 700, 50, 90],
     interestRate: 1,
     pin: 4444,
+    movementsDates: [
+      "2019-11-18T21:31:17.178Z",
+      "2019-12-23T07:42:02.383Z",
+      "2020-01-28T09:15:04.904Z",
+      "2020-04-01T10:17:24.185Z",
+      "2020-05-08T14:11:59.604Z",
+      "2020-05-27T17:01:17.194Z",
+      "2020-07-11T23:36:17.929Z",
+      "2020-07-12T10:51:36.790Z",
+    ],
+    currency: "EUR",
+    locale: "pt-PT",
   };
 
   const accounts = [account1, account2, account3, account4];
@@ -45,6 +93,7 @@ const Home = () => {
   const [username, setUsername] = useState("");
   const [current, setCurrent] = useState([]);
   const [currentMovements, setCurrentMovements] = useState([]);
+  const [currentMovementsDates, setCurrentMovementsDates] = useState([]);
   const [userpin, setUserpin] = useState("");
   const [curBalance, setCurBalance] = useState("");
   const [curDeposit, setCurDeposit] = useState("");
@@ -56,11 +105,37 @@ const Home = () => {
   const [closeUser, setCloseUser] = useState("");
   const [closePin, setClosePin] = useState("");
   const [curAccounts, setCurAccounts] = useState(accounts);
-  const [sorted, setSorted] = useState(false);
+  const [sorted, setSorted] = useState(true);
   const [loanAmount, setLoanAmount] = useState();
+  const [year, setYear] = useState("");
+  const [month, setMonth] = useState("");
+  const [date, setDate] = useState("");
+  const [day, setDay] = useState([]);
+  const [hour, setHour] = useState("");
+  const [minutes, setMinutes] = useState("");
+  const [seconds, setSeconds] = useState("");
+  const [timerMinutes, setTimerMinutes] = useState("");
+  const [timerSeconds, setTimerSeconds] = useState("");
+  let [time, setTime] = useState(200);
 
   //   console.log(current);
   //   console.log(currentMovements);
+
+  /////////////////////Setting Dates/////////////////////////////////
+  useEffect(() => {
+    const generateDate = () => {
+      const today = new Date();
+      console.log(today);
+      setYear(today.getFullYear());
+      setMonth(`${today.getMonth() + 1}`.padStart(2, 0));
+      setDay(today.getDay());
+      setDate(`${today.getDate()}`.padStart(2, 0));
+      setHour(today.getHours());
+      setMinutes(today.getMinutes());
+      setSeconds(today.getSeconds());
+    };
+    generateDate();
+  }, []);
 
   ////////////Generate Username////////////////////
 
@@ -90,17 +165,37 @@ const Home = () => {
     loanRef.current.value = "";
   };
 
+  //////////////////////Display Timeout///////////////////////////
+  const startTimer = () => {
+    timer = setInterval(() => {
+      time--;
+      const minutes = String(Math.trunc(time / 60)).padStart(2, 0);
+      const seconds = String(time % 60).padStart(2, 0);
+      setTimerMinutes(minutes);
+      setTimerSeconds(seconds);
+      if (time === 0) {
+        clearInterval(timer);
+        mainRef.current.style.opacity = 0;
+      }
+    }, 1000);
+    return timer;
+  };
+
   /////////////////DISPLAY UI/////////////////////////////////
 
   let currentAccount;
+
   const displayUI = (accs) => {
     currentAccount = accs?.find(
       (acc, ind) => acc.userName === username && acc.pin === +userpin
     );
     if (currentAccount) {
+      console.log(currentAccount);
+      setTime(20);
       clearInput();
       setCurrent(currentAccount);
       setCurrentMovements(currentAccount.movements);
+      setCurrentMovementsDates(currentAccount.movementsDates);
       setWelcome(`Welcome back ${currentAccount.owner}`);
       calcBalance(currentAccount);
       calcDeposits(currentAccount);
@@ -111,6 +206,8 @@ const Home = () => {
       setTimeout(() => {
         loginRef.current.textContent = `${currentAccount.owner}`;
       }, 4000);
+
+      //////////////////////generate Date///////////////////
     } else {
       return;
     }
@@ -149,8 +246,11 @@ const Home = () => {
   };
 
   ///////////////////////Handle Log In ///////////////////////////////
+  let timer;
   const handleLogin = (e) => {
     e.preventDefault();
+    timer && console.log("started timing");
+    startTimer();
     displayUI(curAccounts);
     clearInput();
   };
@@ -171,7 +271,10 @@ const Home = () => {
     clearInput();
     if (curBalance > tfAmount && receiver) {
       receiver.movements.push(+tfAmount);
+      receiver.movementsDates.push(new Date().toISOString());
+
       currentMovements.push(-tfAmount);
+      currentMovementsDates.push(new Date().toISOString());
       updateUI(current);
     } else {
       return;
@@ -182,14 +285,11 @@ const Home = () => {
 
   //////////////////Sort Movements///////////////////////////
 
-  //   const btnSort = (e, mov) => {
-  //     e.preventDefault();
-  //     setSorted((prev) => !prev);
-  //     const sortMov = sorted ? mov.slice().sort((a, b) => a - b) : mov;
-  //     setCurrentMovements();
-  //     console.log(currentMovements);
-  //     console.log(sorted);
-  //   };
+  const btnSort = (e, mov) => {
+    e.preventDefault();
+    setSorted(!sorted);
+    current.movements = sorted ? mov.slice().sort((a, b) => a - b) : mov;
+  };
 
   /////////////////////Request Loan ///////////////////////
   const handleLoan = (e, mov) => {
@@ -223,12 +323,6 @@ const Home = () => {
 
   //////////////////calculating the highest number in an array using the reduce method///////////////////
 
-  //   const arr = [12, 56, 1, 24, 75, 34, 23, 123, 93, 1];
-  //   const sortedNew = arr.reduce(
-  //     (acc, cur, ind) => (acc > cur && acc[ind] > 1 ? cur : acc),
-  //     0
-  //   );
-  //   console.log(sortedNew);
   return (
     <div className='home'>
       <nav className='navbar'>
@@ -270,7 +364,8 @@ const Home = () => {
             <div>
               <p className='balance__label'>Current balance</p>
               <p className='balance__date'>
-                As of <span className='date'>05/03/2037</span>
+                As of{" "}
+                <span className='date'>{`${date}/${month}/${year},  ${hour}:${minutes}`}</span>
               </p>
             </div>
             <p className='balance__value'>{curBalance}€</p>
@@ -278,20 +373,26 @@ const Home = () => {
           <div className='movement__operations'>
             <div className='mainMiddle'>
               <div className='movements'>
-                {currentMovements?.map((mov, ind) => (
+                {current.movements?.map((cur, ind) => (
                   <div className='movements__row' key={ind}>
                     <div
                       className={
-                        mov > 0
+                        cur > 0
                           ? "movements__type movements__type--deposit"
                           : "movements__type movements__type--withdrawal"
                       }
                     >
                       {ind}
-                      {mov > 0 ? "deposits" : "withdrawals"}
+                      {cur > 0 ? "deposits" : "withdrawals"}
                     </div>
-                    <div className='movements__date'>3 days ago</div>
-                    <div className='movements__value'>{mov}€</div>
+                    <div className='movements__date'>
+                      {`${
+                        new Date(currentMovementsDates[ind])
+                          .toISOString()
+                          .split(/[T ]/i, 1)[0]
+                      }`}
+                    </div>
+                    <div className='movements__value'>{cur}€</div>
                   </div>
                 ))}
               </div>
@@ -396,14 +497,18 @@ const Home = () => {
                   {curInterest}€
                 </p>
                 <button
-                  //   onClick={(e) => btnSort(e, currentMovements)}
+                  onClick={(e) => btnSort(e, currentMovements)}
                   className='btn--sort'
                 >
                   &#8595;&#8593;SORT
                 </button>
               </div>
               <p className='logout-timer'>
-                You will be logged out in <span className='timer'>05:00</span>
+                You will be logged out in
+                <span className='timer'>
+                  {" "}
+                  {`${timerMinutes}:${timerSeconds}`}
+                </span>
               </p>
             </div>
           </div>
