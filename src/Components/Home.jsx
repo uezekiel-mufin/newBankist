@@ -119,6 +119,7 @@ const Home = () => {
   const [seconds, setSeconds] = useState("");
   const [timerMinutes, setTimerMinutes] = useState("");
   const [timerSeconds, setTimerSeconds] = useState("");
+  const [curTime, setCurTime] = useState(300);
 
   /////////////////////Setting Dates/////////////////////////////////
   useEffect(() => {
@@ -166,7 +167,7 @@ const Home = () => {
   //////////////////////Display Timeout///////////////////////////
   let timer;
   const startTimer = () => {
-    let time = 600;
+    let time = curTime;
     timer = setInterval(() => {
       time--;
       const minutes = String(Math.trunc(time / 60)).padStart(2, 0);
@@ -198,8 +199,6 @@ const Home = () => {
       (acc, ind) => acc.userName === username && acc.pin === +userpin
     );
     if (currentAccount) {
-      console.log(currentAccount);
-      clearInterval(timer);
       clearInput();
       setCurrent(currentAccount);
       setCurrentMovements(currentAccount.movements);
@@ -209,7 +208,7 @@ const Home = () => {
       calcDeposits(currentAccount);
       calcWithdrawals(currentAccount);
       calcInterest(currentAccount);
-
+      timer = startTimer();
       nameRef.current.style.display =
         pinRef.current.style.display =
         loginBtnRef.current.style.display =
@@ -260,22 +259,21 @@ const Home = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
+    clearInterval(timer);
     displayUI(curAccounts);
-    startTimer();
     clearInput();
   };
 
   //////////////////////////////Handle Log out /////////////////////
   const handleLogout = (e) => {
     e.preventDefault();
+    setCurTime(300);
     clearInterval(timer);
     mainRef.current.style.opacity = 0;
     loginBtnRef.current.style.display =
       nameRef.current.style.display =
       pinRef.current.style.display =
         "flex";
-    setWelcome("");
-    clearInterval(timer);
     logoutRef.current.style.opacity = 0;
     loginRef.current.textContent = "Log in to get started";
   };

@@ -314,6 +314,7 @@ h2 {
 
 .timer {
   font-weight: 600;
+  margin-left: 0.5rem;
 }
 
 @media (max-width: 600px) {
