@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./home.css";
-
+import FirstPage from "./FirstPage";
 import Logo from "../assets/logo.png";
 import { FiLogOut } from "react-icons/fi";
 
@@ -44,7 +44,7 @@ const Home = () => {
   };
 
   const account3 = {
-    owner: "Parry Ogbemudia",
+    owner: "Jessica Davis",
     movements: [200, -200, 340, -300, -20, 50, 400, -460],
     interestRate: 0.7,
     pin: 3333,
@@ -63,7 +63,7 @@ const Home = () => {
   };
 
   const account4 = {
-    owner: "Ose Billions",
+    owner: "Steven Thomas Williams",
     movements: [430, 1000, 700, 50, 90],
     interestRate: 1,
     pin: 4444,
@@ -116,27 +116,27 @@ const Home = () => {
   const [day, setDay] = useState([]);
   const [hour, setHour] = useState("");
   const [minutes, setMinutes] = useState("");
-  const [seconds, setSeconds] = useState("");
-  const [timerMinutes, setTimerMinutes] = useState("");
-  const [timerSeconds, setTimerSeconds] = useState("");
-  const [curTime, setCurTime] = useState(300);
+  const [timer, setTimer] = useState(undefined);
+  const [today, setToday] = useState(undefined);
+  const [curOptions, setCurOptions] = useState(undefined);
+  const [modal, setModal] = useState(true);
 
   /////////////////////Setting Dates/////////////////////////////////
   useEffect(() => {
-    const generateDate = () => {
-      const today = new Date();
-      console.log(today);
-      setYear(today.getFullYear());
-      setMonth(`${today.getMonth() + 1}`.padStart(2, 0));
-      setDay(today.getDay());
-      setDate(`${today.getDate()}`.padStart(2, 0));
-      setHour(today.getHours());
-      setMinutes(today.getMinutes());
-      setSeconds(today.getSeconds());
+    const now = new Date();
+    setToday(now);
+    const options = {
+      hour: "numeric",
+      minute: "numeric",
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+      // weekday: "short",
     };
-    generateDate();
+    setCurOptions(options);
   }, []);
 
+  console.log(modal);
   ////////////Generate Username////////////////////
 
   const generateUsername = (account) => {
@@ -150,33 +150,24 @@ const Home = () => {
     );
   };
   generateUsername(accounts);
-  const handleUserName = (e) => {
-    e.preventDefault();
-    setUsername(e.target.value);
-  };
 
   ///////////Clear All Input Field///////////
   const clearInput = () => {
-    pinRef.current.value = "";
-    nameRef.current.value = "";
+    nameRef.current.value = pinRef.current.value = "";
     amountRef.current.value = transferRef.current.value = "";
     closePinRef.current.value = closeUserRef.current.value = "";
     loanRef.current.value = "";
   };
 
   //////////////////////Display Timeout///////////////////////////
-  let timer;
+
   const startTimer = () => {
-    let time = curTime;
-    timer = setInterval(() => {
-      time--;
+    const tick = () => {
       const minutes = String(Math.trunc(time / 60)).padStart(2, 0);
       const seconds = String(time % 60).padStart(2, 0);
-      setTimerMinutes(minutes);
-      setTimerSeconds(seconds);
 
+      document.querySelector(".timer").textContent = `${minutes}:${seconds}`;
       if (time === 0) {
-        console.log("zero");
         clearInterval(timer);
         mainRef.current.style.opacity = 0;
         loginBtnRef.current.style.display =
@@ -184,19 +175,22 @@ const Home = () => {
           pinRef.current.style.display =
             "flex";
 
-        logoutRef.current.style.display = "none";
         loginRef.current.textContent = "log in to get started";
       }
-    }, 1000);
+      time--;
+    };
+    let time = 300;
+    tick();
+    setTimer(setInterval(tick, 1000));
+    // return timer;
   };
 
   /////////////////DISPLAY UI/////////////////////////////////
 
   let currentAccount;
-
   const displayUI = (accs) => {
     currentAccount = accs?.find(
-      (acc, ind) => acc.userName === username && acc.pin === +userpin
+      (acc) => acc.userName === username && acc.pin === +userpin
     );
     if (currentAccount) {
       clearInput();
@@ -208,16 +202,10 @@ const Home = () => {
       calcDeposits(currentAccount);
       calcWithdrawals(currentAccount);
       calcInterest(currentAccount);
-      timer = startTimer();
-      nameRef.current.style.display =
-        pinRef.current.style.display =
-        loginBtnRef.current.style.display =
-          "none";
-      logoutRef.current.style.display = "flex";
+      startTimer();
       mainRef.current.style.opacity = 1;
       loginRef.current.textContent = `Welcome ${currentAccount.owner}`;
-
-      //////////////////////generate Date///////////////////
+      updateUI(currentAccount);
     } else {
       return;
     }
@@ -227,7 +215,6 @@ const Home = () => {
   const calcBalance = (acc) => {
     const balance = acc.movements.reduce((acc, cur) => acc + cur, 0);
     setCurBalance(+balance);
-    // console.log(balance);
   };
   ////////////////Calculating deposits////////////////////////////////
   const calcDeposits = (acc) => {
@@ -264,20 +251,6 @@ const Home = () => {
     clearInput();
   };
 
-  //////////////////////////////Handle Log out /////////////////////
-  const handleLogout = (e) => {
-    e.preventDefault();
-    setCurTime(300);
-    clearInterval(timer);
-    mainRef.current.style.opacity = 0;
-    loginBtnRef.current.style.display =
-      nameRef.current.style.display =
-      pinRef.current.style.display =
-        "flex";
-    logoutRef.current.style.opacity = 0;
-    loginRef.current.textContent = "Log in to get started";
-  };
-
   /////////////UpdateUI////////////////
   const updateUI = (currentAcc) => {
     setCurrent(currentAcc);
@@ -290,9 +263,9 @@ const Home = () => {
   /////////////Transfer Money///////////////////////
   const transfer = (e, accs) => {
     e.preventDefault();
-    const receiver = accs.find((acc, ind) => acc.userName === curReceiver);
+    const receiver = accs.find((acc) => acc.userName === curReceiver);
     clearInput();
-    if (curBalance > tfAmount && receiver) {
+    if (curBalance > tfAmount && receiver && tfAmount > 0) {
       receiver.movements.push(+tfAmount);
       receiver.movementsDates.push(new Date().toISOString());
 
@@ -302,8 +275,6 @@ const Home = () => {
     } else {
       return;
     }
-    console.log(receiver);
-    console.log(current);
   };
 
   //////////////////Sort Movements///////////////////////////
@@ -317,7 +288,6 @@ const Home = () => {
   /////////////////////Request Loan ///////////////////////
   const handleLoan = (e, mov) => {
     e.preventDefault();
-    console.log(mov);
     setLoanAmount(loanRef.current.value);
     if (mov.some((mov) => mov >= loanAmount * 0.1)) {
       setTimeout(() => {
@@ -326,7 +296,6 @@ const Home = () => {
         updateUI(current);
         clearInput();
         setCurrentMovements((prev) => prev);
-        console.log(mov);
       }, 3000);
     }
   };
@@ -337,225 +306,226 @@ const Home = () => {
     const index = accs.findIndex(
       (mov) => mov.userName === closeUser && mov.pin === +closePin
     );
-    clearInput();
+
     if (current.userName === closeUser && current.pin === +closePin) {
       accs.splice(index, 1);
       setCurAccounts((prev) => prev);
-      console.log(accs);
-      mainRef.current.style.opacity = 0;
+      clearInterval(timer);
+      // mainRef.current.style.opacity = 0;
       loginRef.current.textContent = "Log in";
+      loginBtnRef.current.style.display =
+        nameRef.current.style.display =
+        pinRef.current.style.display =
+          "flex";
+      clearInput();
     }
   };
 
-  //////////////////calculating the highest number in an array using the reduce method///////////////////
-
   return (
-    <div className='home'>
-      <nav className='navbar'>
-        <div className='welcome' ref={loginRef}>
-          Log in to get started
-        </div>
-        <div className='logo'>
-          <img src={Logo} alt='logo' />
-        </div>
-        <div className='login'>
-          <form className='login' onChange={(e) => e.preventDefault()}>
-            <input
-              ref={nameRef}
-              type='text'
-              placeholder='user'
-              className='login__input login__input--user'
-              onChange={(e) => {
-                e.preventDefault();
-                handleUserName(e);
-              }}
-            />
-            <input
-              ref={pinRef}
-              type='text'
-              placeholder='PIN'
-              maxLength='4'
-              className='login__input login__input--pin'
-              onChange={(e) => setUserpin(e.target.value)}
-            />
-            <button
-              ref={loginBtnRef}
-              onClick={(e) => handleLogin(e)}
-              className='login__btn'
-            >
-              &rarr;
-            </button>
-            <button
-              ref={logoutRef}
-              onClick={(e) => handleLogout(e)}
-              className='logout__btn'
-            >
-              logout
-              <FiLogOut />
-            </button>
-          </form>
-        </div>
-      </nav>
-      {current && (
-        <main className='main' ref={mainRef}>
-          <div className='balance'>
-            <div>
-              <p className='balance__label'>Current balance</p>
-              <p className='balance__date'>
-                As of{" "}
-                <span className='date'>{`${date}/${month}/${year},  ${hour}:${minutes}`}</span>
-              </p>
+    <>
+      {modal ? (
+        <FirstPage modal={modal} setModal={setModal} />
+      ) : (
+        <div className='home'>
+          <nav className='navbar'>
+            <div className='welcome' ref={loginRef}>
+              Log in to get started
             </div>
-            <p className='balance__value'>
-              {`${(+curBalance).toFixed(2, 0)}`}€
-            </p>
-          </div>
-          <div className='movement__operations'>
-            <div className='mainMiddle'>
-              <div className='movements'>
-                {current.movements?.map((cur, ind) => (
-                  <div className='movements__row' key={ind}>
-                    <div
-                      className={
-                        cur > 0
-                          ? "movements__type movements__type--deposit"
-                          : "movements__type movements__type--withdrawal"
-                      }
-                    >
-                      {ind}
-                      {cur > 0 ? "deposits" : "withdrawals"}
+            <div className='logo'>
+              <img src={Logo} alt='logo' />
+            </div>
+            <div className='login'>
+              <form className='login' onChange={(e) => e.preventDefault()}>
+                <input
+                  ref={nameRef}
+                  type='text'
+                  placeholder='user'
+                  className='login__input login__input--user'
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+                <input
+                  ref={pinRef}
+                  type='text'
+                  placeholder='PIN'
+                  maxLength='4'
+                  className='login__input login__input--pin'
+                  onChange={(e) => setUserpin(e.target.value)}
+                />
+                <button
+                  ref={loginBtnRef}
+                  onClick={(e) => handleLogin(e)}
+                  className='login__btn'
+                >
+                  &rarr;
+                </button>
+              </form>
+            </div>
+          </nav>
+          {current && (
+            <main className='main' ref={mainRef}>
+              <div className='balance'>
+                <div>
+                  <p className='balance__label'>Current balance</p>
+                  <p className='balance__date'>
+                    As of{" "}
+                    <span className='date'>
+                      {new Intl.DateTimeFormat(
+                        current.locale,
+                        curOptions
+                      ).format(today)}
+                    </span>
+                  </p>
+                </div>
+                <p className='balance__value'>
+                  {`${(+curBalance).toFixed(2, 0)}`}€
+                </p>
+              </div>
+              <div className='movement__operations'>
+                <div className='mainMiddle'>
+                  <div className='movements'>
+                    {current.movements?.map((cur, ind) => (
+                      <div className='movements__row' key={ind}>
+                        <div
+                          className={
+                            cur > 0
+                              ? "movements__type movements__type--deposit"
+                              : "movements__type movements__type--withdrawal"
+                          }
+                        >
+                          {ind}
+                          {cur > 0 ? "deposits" : "withdrawals"}
+                        </div>
+                        <div className='movements__date'>
+                          {`${
+                            new Date(currentMovementsDates[ind])
+                              .toISOString()
+                              .split(/[T ]/i, 1)[0]
+                          }`}
+                        </div>
+                        <div className='movements__value'>
+                          {`${cur.toFixed(2, 0)}`}€
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className='operations'>
+                    {/* OPERATION: TRANSFERS */}
+                    <div className='operation operation--transfer'>
+                      <h2>Transfer money</h2>
+                      <form
+                        className='form form--transfer'
+                        onSubmit={(e) => e.preventDefault()}
+                      >
+                        <input
+                          ref={amountRef}
+                          type='text'
+                          onChange={(e) => setCurReceiver(e.target.value)}
+                          className='form__input form__input--to'
+                        />
+                        <input
+                          ref={transferRef}
+                          type='number'
+                          className='form__input form__input--amount'
+                          onChange={(e) => setTfAmount(e.target.value)}
+                        />
+                        <button
+                          onClick={(e) => transfer(e, curAccounts)}
+                          className='form__btn form__btn--transfer'
+                        >
+                          &rarr;
+                        </button>
+                        <label className='form__label'>Transfer to</label>
+                        <label className='form__label'>Amount</label>
+                      </form>
                     </div>
-                    <div className='movements__date'>
-                      {`${
-                        new Date(currentMovementsDates[ind])
-                          .toISOString()
-                          .split(/[T ]/i, 1)[0]
-                      }`}
+                    {/*  OPERATION: LOAN  */}
+                    <div className='operation operation--loan'>
+                      <h2>Request loan</h2>
+                      <form className='form form--loan'>
+                        <input
+                          ref={loanRef}
+                          type='number'
+                          className='form__input form__input--loan-amount'
+                          onChange={(e) => setLoanAmount(e.target.value)}
+                        />
+                        <button
+                          onClick={(e) => handleLoan(e, currentMovements)}
+                          className='form__btn form__btn--loan'
+                        >
+                          &rarr;
+                        </button>
+                        <label className='form__label form__label--loan'>
+                          Amount
+                        </label>
+                      </form>
                     </div>
-                    <div className='movements__value'>
-                      {`${cur.toFixed(2, 0)}`}€
+
+                    {/* OPERATION: CLOSE */}
+                    <div className='operation operation--close'>
+                      <h2>Close account</h2>
+                      <form className='form form--close'>
+                        <input
+                          ref={closeUserRef}
+                          type='text'
+                          className='form__input form__input--user'
+                          onChange={(e) => setCloseUser(e.target.value)}
+                        />
+                        <input
+                          ref={closePinRef}
+                          type='password'
+                          maxLength='6'
+                          onChange={(e) => setClosePin(e.target.value)}
+                          className='form__input form__input--pin'
+                        />
+                        <button
+                          onClick={(e) => handleClose(e, curAccounts)}
+                          className='form__btn form__btn--close'
+                        >
+                          &rarr;
+                        </button>
+                        <label className='form__label'>Confirm user</label>
+                        <label className='form__label'>Confirm PIN</label>
+                      </form>
                     </div>
                   </div>
-                ))}
-              </div>
-
-              <div className='operations'>
-                {/* OPERATION: TRANSFERS */}
-                <div className='operation operation--transfer'>
-                  <h2>Transfer money</h2>
-                  <form
-                    className='form form--transfer'
-                    onSubmit={(e) => e.preventDefault()}
-                  >
-                    <input
-                      ref={amountRef}
-                      type='text'
-                      onChange={(e) => setCurReceiver(e.target.value)}
-                      className='form__input form__input--to'
-                    />
-                    <input
-                      ref={transferRef}
-                      type='number'
-                      className='form__input form__input--amount'
-                      onChange={(e) => setTfAmount(e.target.value)}
-                    />
-                    <button
-                      onClick={(e) => transfer(e, curAccounts)}
-                      className='form__btn form__btn--transfer'
-                    >
-                      &rarr;
-                    </button>
-                    <label className='form__label'>Transfer to</label>
-                    <label className='form__label'>Amount</label>
-                  </form>
-                </div>
-                {/*  OPERATION: LOAN  */}
-                <div className='operation operation--loan'>
-                  <h2>Request loan</h2>
-                  <form className='form form--loan'>
-                    <input
-                      ref={loanRef}
-                      type='number'
-                      className='form__input form__input--loan-amount'
-                      onChange={(e) => setLoanAmount(e.target.value)}
-                    />
-                    <button
-                      onClick={(e) => handleLoan(e, currentMovements)}
-                      className='form__btn form__btn--loan'
-                    >
-                      &rarr;
-                    </button>
-                    <label className='form__label form__label--loan'>
-                      Amount
-                    </label>
-                  </form>
                 </div>
 
-                {/* OPERATION: CLOSE */}
-                <div className='operation operation--close'>
-                  <h2>Close account</h2>
-                  <form className='form form--close'>
-                    <input
-                      ref={closeUserRef}
-                      value={closeUser}
-                      type='text'
-                      className='form__input form__input--user'
-                      onChange={(e) => setCloseUser(e.target.value)}
-                    />
-                    <input
-                      ref={closePinRef}
-                      value={closePin}
-                      type='password'
-                      maxLength='6'
-                      onChange={(e) => setClosePin(e.target.value)}
-                      className='form__input form__input--pin'
-                    />
+                <div className='footer'>
+                  {/* SUMMARY  */}
+                  <div className='summary'>
+                    <p className='summary__label'>In</p>
+                    <p className='summary__value summary__value--in'>
+                      {`${(+curDeposit).toFixed(2, 0)}`}€
+                    </p>
+                    <p className='summary__label'>Out</p>
+                    <p className='summary__value summary__value--out'>
+                      {`${(+curWithdrawals).toFixed(2, 0)}`}
+                    </p>
+                    <p className='summary__label'>Interest</p>
+                    <p className='summary__value summary__value--interest'>
+                      {`${(+curInterest).toFixed(2, 0)}`}€
+                    </p>
                     <button
-                      onClick={(e) => handleClose(e, curAccounts)}
-                      className='form__btn form__btn--close'
+                      onClick={(e) => btnSort(e, currentMovements)}
+                      className='btn--sort'
                     >
-                      &rarr;
+                      &#8595;&#8593;SORT
                     </button>
-                    <label className='form__label'>Confirm user</label>
-                    <label className='form__label'>Confirm PIN</label>
-                  </form>
+                  </div>
+                  <p className='logout-timer'>
+                    You will be logged out in
+                    <span className='timer'>
+                      {/* {`${timerMinutes}:${timerSeconds}`} */}
+                    </span>
+                  </p>
                 </div>
               </div>
-            </div>
-
-            <div className='footer'>
-              {/* SUMMARY  */}
-              <div className='summary'>
-                <p className='summary__label'>In</p>
-                <p className='summary__value summary__value--in'>
-                  {`${(+curDeposit).toFixed(2, 0)}`}€
-                </p>
-                <p className='summary__label'>Out</p>
-                <p className='summary__value summary__value--out'>
-                  {`${(+curWithdrawals).toFixed(2, 0)}`}
-                </p>
-                <p className='summary__label'>Interest</p>
-                <p className='summary__value summary__value--interest'>
-                  {`${(+curInterest).toFixed(2, 0)}`}€
-                </p>
-                <button
-                  onClick={(e) => btnSort(e, currentMovements)}
-                  className='btn--sort'
-                >
-                  &#8595;&#8593;SORT
-                </button>
-              </div>
-              <p className='logout-timer'>
-                You will be logged out in
-                <span className='timer'>
-                  {`${timerMinutes}:${timerSeconds}`}
-                </span>
-              </p>
-            </div>
-          </div>
-        </main>
+            </main>
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 };
 
