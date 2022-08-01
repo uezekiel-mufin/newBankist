@@ -10,20 +10,35 @@ const FirstPage = ({ modal, setModal }) => {
         <div className='modal__head'>
           <AiOutlineClose
             onClick={() => setModal(false)}
-            style={{ fontSize: "3rem", fontWeight: 700, color: "blue" }}
+            style={{ fontSize: "2rem", fontWeight: 700, color: "blue" }}
           />
         </div>
         <div className='modal__body'>
           <span className='modal__subheader'>
             Log In with any of the following account details
           </span>
-          <h2> Acc 1: user: js, pin 1111</h2>
-          <h2> Acc 2: user: ee, pin 2222</h2>
-          <h2> Acc 3: user: jd, pin 3333</h2>
-          <h2> Acc 4: user: stw, pin 4444</h2>
-          <Link to='/howto'>
+          <div className='login__details'>
+            <h2 className='details'>
+              <span> Acc 1:-- username:js,</span> <span> pin: 1111</span>
+            </h2>
+            <h2 className='details'>
+              <span> Acc 2:-- username:ee,</span> <span> pin: 2222</span>
+            </h2>
+            <h2 className='details'>
+              <span> Acc 3:-- username:jd,</span> <span> pin: 3333</span>
+            </h2>
+            <h2 className='details'>
+              <span> Acc 4:-- username:stw,</span> <span> pin: 4444</span>
+            </h2>
+          </div>
+
+          <a
+            href='https://github.com/Ezzywealth/newBankist'
+            target='_blank'
+            rel='noreferrer'
+          >
             <button>How To use</button>
-          </Link>
+          </a>
         </div>
       </div>
     </div>

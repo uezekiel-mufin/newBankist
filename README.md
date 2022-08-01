@@ -10,3 +10,7 @@
 
 -ReactJS
 -CSS
+
+## How to use
+- The bankist app lets users to carry out financial transactions within themselves.
+- You can send money to any registered user, you can borrow loan , and you can even close down your account at will. 
