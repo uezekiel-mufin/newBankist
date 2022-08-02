@@ -10,7 +10,13 @@ const FirstPage = ({ modal, setModal }) => {
         <div className='modal__head'>
           <AiOutlineClose
             onClick={() => setModal(false)}
-            style={{ fontSize: "2rem", fontWeight: 700, color: "blue" }}
+            style={{
+              fontSize: "2rem",
+              fontWeight: 700,
+              color: "blue",
+              cursor: "pointer",
+              marginBottom: "2rem",
+            }}
           />
         </div>
         <div className='modal__body'>
@@ -19,16 +25,20 @@ const FirstPage = ({ modal, setModal }) => {
           </span>
           <div className='login__details'>
             <h2 className='details'>
-              <span> Acc 1:-- username:js,</span> <span> pin: 1111</span>
+              <span> Acc 1:-- username:&nbsp; js,</span>{" "}
+              <span> pin: &nbsp; 1111</span>
             </h2>
             <h2 className='details'>
-              <span> Acc 2:-- username:ee,</span> <span> pin: 2222</span>
+              <span> Acc 2:-- username:&nbsp; ee,</span>{" "}
+              <span> pin:&nbsp; 2222</span>
             </h2>
             <h2 className='details'>
-              <span> Acc 3:-- username:jd,</span> <span> pin: 3333</span>
+              <span> Acc 3:-- username:&nbsp; jd,</span>{" "}
+              <span> pin:&nbsp; 3333</span>
             </h2>
             <h2 className='details'>
-              <span> Acc 4:-- username:stw,</span> <span> pin: 4444</span>
+              <span> Acc 4:-- username:&nbsp; stw,</span>{" "}
+              <span> pin:&nbsp; 4444</span>
             </h2>
           </div>
 
